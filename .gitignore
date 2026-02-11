@@ -1,0 +1,7 @@
+__pycache__/
+*pyc
+repairs.db
+*.db
+.env
+practice/
+controller_api/
