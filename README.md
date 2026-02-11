@@ -33,3 +33,7 @@ uvicorn tm:app --reload
 - POST `/login` - Use existing user.
 - PUT `/tasks/{task_id}` - Update task if user is authenticated to do so.
 - DELETE `/tasks/{task_id}` - Delete task if user is authenticated to do so.
+
+
+
+[project link, ignore](https://github.com/vergilificent/task-manager-api-crud)
