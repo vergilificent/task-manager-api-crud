@@ -1,6 +1,6 @@
 # Task Manager with basic CRUD functions
 
-_Made in FastAPI, using SQLite._
+_Made in FastAPI, using SQLite for the database model._
 
 ## Features
 - Create tasks
