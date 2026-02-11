@@ -36,4 +36,4 @@ uvicorn tm:app --reload
 
 
 
-[project link, ignore](https://github.com/vergilificent/task-manager-api-crud)
+[project link, ignore](https://roadmap.sh/projects/todo-list-api)
