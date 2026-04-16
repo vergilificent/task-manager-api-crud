@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, status, Path, Depends
 from typing import Optional
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from datebase import SessionLocal, UserDB, TaskDB
 from auth import hash_password, verify_password, create_access_token
 from datetime import timedelta
@@ -95,10 +96,13 @@ def root():
 #sign up
 @app.post("/signup", status_code=status.HTTP_201_CREATED)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
-    #check if username already exists
+    # Check duplicates before insert so the UI gets a helpful error.
     existing_user = db.query(UserDB).filter(UserDB.username == user.username).first()
     if existing_user:
         raise HTTPException(status_code = 400, detail = "username already exists")
+    existing_email = db.query(UserDB).filter(UserDB.email == user.email).first()
+    if existing_email:
+        raise HTTPException(status_code = 400, detail = "email already exists")
     
     #create new user with hashed password
     new_user = UserDB (
@@ -107,7 +111,11 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
         hashed_password = hash_password(user.password)
     ) 
     db.add(new_user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="account already exists")
     db.refresh(new_user)
 
     return {"message":"user created", "username": user.username}
@@ -152,7 +160,7 @@ def get_tasks(db: Session = Depends(get_db), current_user: UserDB = Depends(get_
 
 #get one task
 @app.get("/tasks/{task_id}")
-def get_task(task_id= id, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
+def get_task(task_id: int, db: Session = Depends(get_db), current_user: UserDB = Depends(get_current_user)):
     task = db.query(TaskDB).filter(TaskDB.id == task_id, TaskDB.user_id == current_user.id).first()
     if not task: 
         raise HTTPException(status_code=404, detail="task not found")
