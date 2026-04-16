@@ -635,7 +635,7 @@
 <div id="toast-container"></div>
 
 <script>
-  const API = 'https://task-manager-api-crud.onrender.com';
+  const API = window.location.origin;
   let token = localStorage.getItem('tm_token') || null;
   let username = localStorage.getItem('tm_user') || null;
   let allTasks = [];

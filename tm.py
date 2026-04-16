@@ -1,3 +1,4 @@
+from pathlib import Path as FilePath
 from fastapi import FastAPI, HTTPException, status, Path, Depends
 from typing import Optional
 from pydantic import BaseModel
@@ -11,6 +12,9 @@ from auth import SECRET_KEY, ALGORITHM
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+
+BASE_DIR = FilePath(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
 
 def get_db():
     db = SessionLocal()
@@ -43,12 +47,12 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 #pydantic models for requests/responses
 
@@ -86,7 +90,7 @@ class TaskUpdate(BaseModel):
 #root
 @app.get("/")
 def root():
-    return FileResponse("static/index.html")
+    return FileResponse(str(STATIC_DIR / "index.html"))
 
 #sign up
 @app.post("/signup", status_code=status.HTTP_201_CREATED)
