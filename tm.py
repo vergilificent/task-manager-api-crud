@@ -8,6 +8,9 @@ from datetime import timedelta
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from auth import SECRET_KEY, ALGORITHM
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 def get_db():
     db = SessionLocal()
@@ -36,6 +39,16 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 #makes fastapi instance
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 #pydantic models for requests/responses
 
@@ -73,7 +86,7 @@ class TaskUpdate(BaseModel):
 #root
 @app.get("/")
 def root():
-    return {"message":"/docs to begin"}
+    return FileResponse("static/index.html")
 
 #sign up
 @app.post("/signup", status_code=status.HTTP_201_CREATED)
