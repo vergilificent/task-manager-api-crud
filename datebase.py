@@ -6,8 +6,10 @@ from sqlalchemy.orm import sessionmaker
 
 #database setup
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_SQLITE_PATH = BASE_DIR / "myapi.db" if os.name == "nt" else Path("/tmp/myapi.db")
+RUNNING_ON_RENDER = os.getenv("RENDER") == "true"
+DEFAULT_SQLITE_PATH = Path("/tmp/myapi.db") if RUNNING_ON_RENDER or os.name != "nt" else BASE_DIR / "myapi.db"
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_SQLITE_PATH.as_posix()}")
+DEFAULT_SQLITE_PATH.parent.mkdir(parents=True, exist_ok=True)
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
